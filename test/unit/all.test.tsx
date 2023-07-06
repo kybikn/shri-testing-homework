@@ -5,190 +5,13 @@ import { Provider } from 'react-redux';
 import { initStore } from "../../src/client/store";
 import { Application } from "../../src/client/Application";
 import React from "react";
-import { CartState } from "../../src/common/types";
 import userEvent from "@testing-library/user-event";
-import { waitForElementToBeRemoved } from "@testing-library/react";
+import { mockApi, mockCart, productsData } from "../tools/mocks";
 
-
-const productsData = [
-    {
-        "id": 0,
-        "name": "Handmade Pizza",
-        "price": 509
-    },
-    {
-        "id": 1,
-        "name": "Unbranded Chips",
-        "price": 35
-    },
-    {
-        "id": 2,
-        "name": "Generic Pants",
-        "price": 106
-    },
-    {
-        "id": 3,
-        "name": "Rustic Ball",
-        "price": 999
-    },
-    {
-        "id": 4,
-        "name": "Generic Chips",
-        "price": 250
-    },
-    {
-        "id": 5,
-        "name": "Generic Bike",
-        "price": 438
-    },
-    {
-        "id": 6,
-        "name": "Handmade Sausages",
-        "price": 320
-    },
-    {
-        "id": 7,
-        "name": "Generic Salad",
-        "price": 608
-    },
-    {
-        "id": 8,
-        "name": "Handmade Hat",
-        "price": 224
-    },
-    {
-        "id": 9,
-        "name": "Fantastic Car",
-        "price": 291
-    },
-    {
-        "id": 10,
-        "name": "Intelligent Towels",
-        "price": 382
-    },
-    {
-        "id": 11,
-        "name": "Handmade Chicken",
-        "price": 322
-    },
-    {
-        "id": 12,
-        "name": "Intelligent Chair",
-        "price": 2
-    },
-    {
-        "id": 13,
-        "name": "Licensed Gloves",
-        "price": 945
-    },
-    {
-        "id": 14,
-        "name": "Incredible Pants",
-        "price": 470
-    },
-    {
-        "id": 15,
-        "name": "Practical Tuna",
-        "price": 225
-    },
-    {
-        "id": 16,
-        "name": "Licensed Bike",
-        "price": 404
-    },
-    {
-        "id": 17,
-        "name": "Ergonomic Cheese",
-        "price": 557
-    },
-    {
-        "id": 18,
-        "name": "Incredible Sausages",
-        "price": 421
-    },
-    {
-        "id": 19,
-        "name": "Intelligent Shirt",
-        "price": 513
-    },
-    {
-        "id": 20,
-        "name": "Unbranded Chips",
-        "price": 709
-    },
-    {
-        "id": 21,
-        "name": "Ergonomic Bike",
-        "price": 814
-    },
-    {
-        "id": 22,
-        "name": "Licensed Mouse",
-        "price": 518
-    },
-    {
-        "id": 23,
-        "name": "Awesome Hat",
-        "price": 23
-    },
-    {
-        "id": 24,
-        "name": "Incredible Hat",
-        "price": 734
-    },
-    {
-        "id": 25,
-        "name": "Ergonomic Towels",
-        "price": 550
-    },
-    {
-        "id": 26,
-        "name": "Intelligent Towels",
-        "price": 176
-    }
-]
-
-const productDetailsData = {
-    "description": "Boston's most advanced compression wear technology increases muscle oxygenation, stabilizes active muscles",
-    "color": "grey",
-    "material": "Concrete",
-}
-
-let checkoutCount = 1
-const getCheckoutRes = () => { return { "id": checkoutCount++ } };
-
-const mockCart = {
-    getState(): CartState {
-        try {
-            const json = localStorage.getItem('test-store-cart');
-            return json ? JSON.parse(json) as CartState : {};
-        } catch {
-            return {};
-        }
-    },
-    setState(cart: CartState) {
-        localStorage.setItem('test-store-cart', JSON.stringify(cart));
-    }
-} as any;
-
-const mockApi = {
-    basename: '/hw/store',
-    getProducts: jest.fn(async () => {
-        return await Promise.resolve({ data: productsData });
-    }),
-
-    getProductById: jest.fn(async (id: number) => {
-        const data = productsData.find(product => product.id === id) as any
-        const result = Object.assign({}, data, productDetailsData);
-        return await Promise.resolve({ data: result });
-    }),
-
-    checkout: jest.fn(() => {
-        Promise.resolve(getCheckoutRes());
-    }),
-} as any;
+const getCheckoutRes = () => {
+    return { "id": 1 }
+};
 const store = initStore(mockApi, mockCart);
-
 
 describe('Раздел Общие', () => {
 
@@ -216,18 +39,18 @@ describe('Раздел Общие', () => {
         });
 
         it('отображается ссылка Delivery', () => {
-            const catalogHref = hrefs.find(href => href.includes('delivery'))
-            expect(catalogHref).toBeTruthy();
+            const deliveryHref = hrefs.find(href => href.includes('delivery'))
+            expect(deliveryHref).toBeTruthy();
         });
 
         it('отображается ссылка Contacts', () => {
-            const catalogHref = hrefs.find(href => href.includes('contacts'))
-            expect(catalogHref).toBeTruthy();
+            const contactsHref = hrefs.find(href => href.includes('contacts'))
+            expect(contactsHref).toBeTruthy();
         });
 
         it('отображается ссылка Cart', () => {
-            const catalogHref = hrefs.find(href => href.includes('cart'))
-            expect(catalogHref).toBeTruthy();
+            const cartHref = hrefs.find(href => href.includes('cart'))
+            expect(cartHref).toBeTruthy();
         });
     })
 
@@ -265,7 +88,7 @@ describe('Раздел Страницы', () => {
             expect(pageDiv).toBeTruthy();
         });
 
-        it('по адресу "/catalog" должна открываться страница "Каталог" ("catalog")', () => {
+        it('по адресу "/catalog" должна открываться страница "Каталог"', () => {
             const application = (
                 <MemoryRouter initialEntries={["/catalog"]} initialIndex={0}>
                     <Provider store={store}>
@@ -278,7 +101,7 @@ describe('Раздел Страницы', () => {
             expect(pageDiv).toBeTruthy();
         });
 
-        it('по адресу /delivery должна открываться страница "Условия доставки" ("delivery")', () => {
+        it('по адресу /delivery должна открываться страница "Условия доставки"', () => {
             const store = initStore(mockApi, mockCart);
             const application = (
                 <MemoryRouter initialEntries={["/delivery"]} initialIndex={0}>
@@ -292,7 +115,7 @@ describe('Раздел Страницы', () => {
             expect(pageDiv).toBeTruthy();
         });
 
-        it('по адресу /contacts должна открываться страница "Контакты" ("contacts")', () => {
+        it('по адресу /contacts должна открываться страница "Контакты"', () => {
             const store = initStore(mockApi, mockCart);
             const application = (
                 <MemoryRouter initialEntries={["/contacts"]} initialIndex={0}>
@@ -308,7 +131,7 @@ describe('Раздел Страницы', () => {
     })
 })
 
-it('по адресу /catalog должна открываться страница "Catalog и быть товары"', async () => {
+it('по адресу "/catalog" должна открываться страница "Catalog и быть товары"', async () => {
     const store = initStore(mockApi, mockCart);
 
     const application = (
@@ -319,12 +142,9 @@ it('по адресу /catalog должна открываться страни�
         </MemoryRouter>
     );
     const { container, findAllByText } = render(application);
-
     const productItem = productsData[1];
     await findAllByText(productItem.name);
-
     const pageDivs = container.getElementsByClassName('ProductItem');
-
     expect(pageDivs.length === productsData.length).toBeTruthy();
 });
 
@@ -381,9 +201,7 @@ describe('Раздел Каталог', () => {
     })
 
     it('на странице с подробной информацией отображаются: название товара, его описание, цена, цвет, материал и кнопка * * "добавить в корзину"', async () => {
-
         const productItem = productsData[1];
-
         const store = initStore(mockApi, mockCart);
         const application = (
             <MemoryRouter initialEntries={[`/catalog/${productItem.id}`]} initialIndex={0}>
@@ -393,7 +211,6 @@ describe('Раздел Каталог', () => {
             </MemoryRouter>
         );
         const { container, findByText } = render(application);
-
         const name = await findByText(productItem.name);
         expect(name.textContent).toBeTruthy();
         const price = await findByText(`$${productItem.price}`);
@@ -444,19 +261,72 @@ describe('Раздел Корзина', () => {
             </MemoryRouter>
         );
         const { container } = render(application);
-        // const cartClear = container.querySelector('.Cart-Clear');
         const cartClear = container.getElementsByClassName('Cart-Clear')[0];
         expect(cartClear).toBeTruthy();
-        userEvent.click(cartClear as HTMLElement);
-        await waitForElementToBeRemoved(container.querySelector('.Cart-Table'));
+        await userEvent.click(cartClear as HTMLElement);
         const cartTable = container.querySelector('.Cart-Table');
         expect(cartTable).toBeNull();
+        const cartState = await mockCart.getState();
+        expect(Object.keys(cartState).length).toBeFalsy();
     })
+
+    it('при оформлении заказа, должен появиться текст Well done!', async () => {
+
+        const cart = { "1": { "name": "Rustic Chicken", "count": 1, "price": 242 }, "5": { "name": "Intelligent Chair", "count": 1, "price": 857 }, "14": { "name": "Fantastic Towels", "count": 1, "price": 976 } };
+        await mockCart.setState(cart);
+        const store = initStore(mockApi, mockCart);
+        const application = (
+            <MemoryRouter initialEntries={["/cart"]} initialIndex={0}>
+                <Provider store={store}>
+                    <Application />
+                </Provider>
+            </MemoryRouter>
+        );
+        const { container, getByLabelText, findByText } = render(application);
+        const nameInput = getByLabelText('Name');
+        const phoneInput = getByLabelText('Phone');
+        const addressInput = getByLabelText('Address');
+        const checkoutBtn = container.getElementsByClassName('Form-Submit')[0];
+        expect(checkoutBtn).toBeTruthy();
+        await userEvent.type(nameInput, 'User');
+        await userEvent.type(phoneInput, '1234567890');
+        await userEvent.type(addressInput, 'NewYork');
+        await userEvent.click(checkoutBtn as HTMLElement);
+        const wellDoneMessage = await findByText('Well done!');
+        expect(wellDoneMessage).toBeTruthy();
+    })
+
+    it('текст Well done - цвета успеха', async () => {
+
+        const cart = { "1": { "name": "Rustic Chicken", "count": 1, "price": 242 }, "5": { "name": "Intelligent Chair", "count": 1, "price": 857 }, "14": { "name": "Fantastic Towels", "count": 1, "price": 976 } };
+        await mockCart.setState(cart);
+        const store = initStore(mockApi, mockCart);
+        const application = (
+            <MemoryRouter initialEntries={["/cart"]} initialIndex={0}>
+                <Provider store={store}>
+                    <Application />
+                </Provider>
+            </MemoryRouter>
+        );
+        const { container, getByLabelText, findByText } = render(application);
+        const nameInput = getByLabelText('Name');
+        const phoneInput = getByLabelText('Phone');
+        const addressInput = getByLabelText('Address');
+        const checkoutBtn = container.getElementsByClassName('Form-Submit')[0];
+        expect(checkoutBtn).toBeTruthy();
+        await userEvent.type(nameInput, 'User');
+        await userEvent.type(phoneInput, '1234567890');
+        await userEvent.type(addressInput, 'NewYork');
+        await userEvent.click(checkoutBtn as HTMLElement);
+        await findByText('Well done!');
+        const messageBox = container.querySelector('.Cart-SuccessMessage');
+        expect(messageBox?.classList.contains('alert-success')).toBeTruthy();
+    })
+
 
     it('для каждого товара должны отображаться название, цена, количество , стоимость, а также должна отображаться общая сумма заказа', async () => {
         let cart = { "1": { "name": "Rustic Chicken", "count": 1, "price": 242 }, "5": { "name": "Intelligent Chair", "count": 1, "price": 857 }, "14": { "name": "Fantastic Towels", "count": 1, "price": 976 } };
         mockCart.setState(cart);
-
         const store = initStore(mockApi, mockCart);
         const application = (
             <MemoryRouter initialEntries={["/cart"]} initialIndex={0}>
@@ -466,7 +336,6 @@ describe('Раздел Корзина', () => {
             </MemoryRouter>
         );
         const { container, getByTestId } = render(application);
-
         Object.entries(cart).forEach(([id, item], index) => {
             const row = getByTestId(id);
             const cartIndex = row.querySelector('.Cart-Index')?.textContent;
@@ -485,7 +354,6 @@ describe('Раздел Корзина', () => {
     });
 
     it('в шапке рядом со ссылкой на корзину должно отображаться количество не повторяющихся товаров в ней', async () => {
-        // let cart = {};
         let cart = { "1": { "name": "Rustic Chicken", "count": 1, "price": 242 }, "5": { "name": "Intelligent Chair", "count": 1, "price": 857 }, "14": { "name": "Fantastic Towels", "count": 1, "price": 976 } };
         mockCart.setState(cart);
         const store = initStore(mockApi, mockCart);
@@ -515,5 +383,157 @@ describe('Раздел Корзина', () => {
         const { getByText } = render(application);
         const catalogName = getByText('catalog') as HTMLLinkElement;
         expect(catalogName.href).toContain('/catalog');
+    })
+
+    it('если товар уже добавлен в корзину, в каталоге и на странице товара должно отображаться сообщение об этом', async () => {
+        const productItem = productsData[1];
+        const store = initStore(mockApi, mockCart);
+        const application = (
+            <MemoryRouter initialEntries={[`/catalog/${productItem.id}`]} initialIndex={0}>
+                <Provider store={store}>
+                    <Application />
+                </Provider>
+            </MemoryRouter>
+        );
+        const { findByText, findByRole } = render(application);
+
+        const AddToCartBtn = await findByRole('button', { name: 'Add to Cart' });
+        await userEvent.click(AddToCartBtn);
+        const inCartMessageElement = await findByText('Item in cart');
+        expect(inCartMessageElement).toBeTruthy();
+    })
+
+    it('Кнопка добавления в корзину большая', async () => {
+        const productItem = productsData[1];
+        const store = initStore(mockApi, mockCart);
+        const application = (
+            <MemoryRouter initialEntries={[`/catalog/${productItem.id}`]} initialIndex={0}>
+                <Provider store={store}>
+                    <Application />
+                </Provider>
+            </MemoryRouter>
+        );
+        const { findByRole } = render(application);
+        const AddToCartBtn = await findByRole('button', { name: 'Add to Cart' });
+        expect(AddToCartBtn.classList.contains('btn-lg')).toBeTruthy();
+    })
+})
+
+describe('работает проверка данных формы заказа', () => {
+
+    const cart = { "1": { "name": "Rustic Chicken", "count": 1, "price": 242 }, "5": { "name": "Intelligent Chair", "count": 1, "price": 857 }, "14": { "name": "Fantastic Towels", "count": 1, "price": 976 } };
+    it('нет ошибок если все данные есть', async () => {
+        mockCart.setState(cart);
+        const store = initStore(mockApi, mockCart);
+        const application = (
+            <MemoryRouter initialEntries={["/cart"]} initialIndex={0}>
+                <Provider store={store}>
+                    <Application />
+                </Provider>
+            </MemoryRouter>
+        );
+        const { container, getByLabelText, getByText } = render(application);
+        const nameInput = getByLabelText('Name') as HTMLInputElement;
+        const phoneInput = getByLabelText('Phone') as HTMLInputElement;
+        const addressInput = getByLabelText('Address') as HTMLTextAreaElement;
+        const checkoutBtn = container.getElementsByClassName('Form-Submit')[0];
+        expect(checkoutBtn).toBeTruthy();
+        await userEvent.type(nameInput, 'Username');
+        await userEvent.type(phoneInput, '1234567890');
+        await userEvent.type(addressInput, 'NewYork');
+        await userEvent.click(checkoutBtn as HTMLElement);
+        expect(nameInput.classList.contains('is-invalid')).toBeFalsy();
+        expect(phoneInput.classList.contains('is-invalid')).toBeFalsy();
+        expect(addressInput.classList.contains('is-invalid')).toBeFalsy();
+    })
+
+    it('ошибка если нет имени', async () => {
+        mockCart.setState(cart);
+        const store = initStore(mockApi, mockCart);
+        const application = (
+            <MemoryRouter initialEntries={["/cart"]} initialIndex={0}>
+                <Provider store={store}>
+                    <Application />
+                </Provider>
+            </MemoryRouter>
+        );
+        const { container, getByLabelText, findByText } = render(application);
+        const phoneInput = getByLabelText('Phone') as HTMLInputElement;
+        const addressInput = getByLabelText('Address') as HTMLTextAreaElement;
+        const checkoutBtn = container.getElementsByClassName('Form-Submit')[0];
+        expect(checkoutBtn).toBeTruthy();
+        await userEvent.type(phoneInput, '1234567890');
+        await userEvent.type(addressInput, 'NewYork');
+        await userEvent.click(checkoutBtn as HTMLElement);
+        const errorMessage = await findByText('Please provide your name');
+        expect(errorMessage).toBeTruthy();
+    })
+
+    it('ошибка если нет адреса', async () => {
+        mockCart.setState(cart);
+        const store = initStore(mockApi, mockCart);
+        const application = (
+            <MemoryRouter initialEntries={["/cart"]} initialIndex={0}>
+                <Provider store={store}>
+                    <Application />
+                </Provider>
+            </MemoryRouter>
+        );
+        const { container, getByLabelText, findByText } = render(application);
+        const nameInput = getByLabelText('Name') as HTMLInputElement;
+        const phoneInput = getByLabelText('Phone') as HTMLInputElement;
+        const checkoutBtn = container.getElementsByClassName('Form-Submit')[0];
+        expect(checkoutBtn).toBeTruthy();
+        await userEvent.type(nameInput, 'User');
+        await userEvent.type(phoneInput, '1234567890');
+        await userEvent.click(checkoutBtn as HTMLElement);
+        const errorMessage = await findByText('Please provide a valid address');
+        expect(errorMessage).toBeTruthy();
+    })
+
+    it('ошибка если нет телефона', async () => {
+        mockCart.setState(cart);
+        const store = initStore(mockApi, mockCart);
+        const application = (
+            <MemoryRouter initialEntries={["/cart"]} initialIndex={0}>
+                <Provider store={store}>
+                    <Application />
+                </Provider>
+            </MemoryRouter>
+        );
+        const { container, getByLabelText, findByText } = render(application);
+        const nameInput = getByLabelText('Name') as HTMLInputElement;
+        const addressInput = getByLabelText('Address') as HTMLTextAreaElement;
+        const checkoutBtn = container.getElementsByClassName('Form-Submit')[0];
+        expect(checkoutBtn).toBeTruthy();
+        await userEvent.type(nameInput, 'User');
+        await userEvent.type(addressInput, 'NewYork');
+        await userEvent.click(checkoutBtn as HTMLElement);
+        const errorMessage = await findByText('Please provide a valid phone');
+        expect(errorMessage).toBeTruthy();
+    })
+
+    it('ошибка если неверный телефон', async () => {
+        mockCart.setState(cart);
+        const store = initStore(mockApi, mockCart);
+        const application = (
+            <MemoryRouter initialEntries={["/cart"]} initialIndex={0}>
+                <Provider store={store}>
+                    <Application />
+                </Provider>
+            </MemoryRouter>
+        );
+        const { container, getByLabelText, findByText } = render(application);
+        const nameInput = getByLabelText('Name') as HTMLInputElement;
+        const phoneInput = getByLabelText('Phone') as HTMLInputElement;
+        const addressInput = getByLabelText('Address') as HTMLTextAreaElement;
+        const checkoutBtn = container.getElementsByClassName('Form-Submit')[0];
+        expect(checkoutBtn).toBeTruthy();
+        await userEvent.type(nameInput, 'User');
+        await userEvent.type(phoneInput, '12345ds3232');
+        await userEvent.type(addressInput, 'NewYork');
+        await userEvent.click(checkoutBtn as HTMLElement);
+        const errorMessage = await findByText('Please provide a valid phone');
+        expect(errorMessage).toBeTruthy();
     })
 })
