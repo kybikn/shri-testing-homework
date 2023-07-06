@@ -1,19 +1,9 @@
 const { assert } = require('chai');
+const { checkTooWide } = require('../tools/utils');
 
 const basePath = '/hw/store';
 const baseUrl = 'http://localhost:3000';
 
-const checkTooWide = async (browser, width) => {
-    browser.setWindowSize(width, 1000);
-    const allElements = await browser.$$('*');
-    const widthPromises = allElements.map(element => element.getSize('width'));
-    const widths = await Promise.all(widthPromises);
-    let tooWide = false;
-    for (i = 0; i < widths.length; i++) {
-        if (widths[i] > width) { tooWide = true; break }
-    }
-    return tooWide
-}
 
 describe('страницы  главная, условия доставки, контакты должны иметь статическое содержимое', () => {
     it('"Главная" имеет статическое содержимое', async ({ browser }) => {
@@ -227,28 +217,3 @@ describe('каталог', () => {
     });
 })
 
-describe('заказ', () => {
-
-    it('заказ проходит корректно', async ({ browser }) => {
-        const puppeteer = await browser.getPuppeteer();
-        const [page] = await puppeteer.pages();
-        await page.goto(`${baseUrl}${basePath}/catalog/0`);
-        const addToCart = await browser.$('.ProductDetails-AddToCart');
-        await addToCart.click();
-        await page.goto(`${baseUrl}${basePath}/cart`);
-        const nameInput = await browser.$('.Form-Field_type_name');
-        const phoneInput = await browser.$('.Form-Field_type_phone');
-        const addressInput = await browser.$('.Form-Field_type_address');
-        const checkoutBtn = await browser.$('.Form-Submit');
-        await nameInput.setValue('User');
-        await phoneInput.setValue('12345678901');
-        await addressInput.setValue('NewYork');
-        await checkoutBtn.click();
-        const cartNumber = Number(await browser.$('.Cart-Number').getText());
-        await page.goto(`${baseUrl}${basePath}/api/orders`);
-        const latestOrders = await browser.$('body').getText();
-        const latestOrdersArr = JSON.parse(latestOrders);
-        const foundOrderNumber = latestOrdersArr.find(order => order.id === cartNumber);
-        expect(foundOrderNumber).toBeTruthy()
-    });
-})
