@@ -220,6 +220,9 @@ describe('каталог', () => {
             const productLink = productLinks[i];
             await productLink.click();
             const productDetailsElem = await browser.$('.ProductDetails');
+            await browser.waitUntil(async function () {
+                return await productDetailsElem.isExisting();
+            })
             let isDisplayed = await productDetailsElem.isDisplayed();
             expect(isDisplayed).toBeTruthy();
             await page.goto(`${baseUrl}${basePath}/catalog`)
