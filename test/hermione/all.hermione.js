@@ -1,9 +1,19 @@
 const { assert } = require('chai');
-const { checkTooWide } = require('../tools/utils');
 
 const basePath = '/hw/store';
 const baseUrl = 'http://localhost:3000';
 
+const checkTooWide = async (browser, width) => {
+    browser.setWindowSize(width, 1000);
+    const allElements = await browser.$$('*');
+    const widthPromises = allElements.map(element => element.getSize('width'));
+    const widths = await Promise.all(widthPromises);
+    let tooWide = false;
+    for (let i = 0; i < widths.length; i++) {
+        if (widths[i] > width) { tooWide = true; break }
+    }
+    return tooWide
+}
 
 describe('страницы  главная, условия доставки, контакты должны иметь статическое содержимое', () => {
     it('"Главная" имеет статическое содержимое', async ({ browser }) => {
@@ -212,7 +222,7 @@ describe('каталог', () => {
             const productDetailsElem = await browser.$('.ProductDetails');
             let isDisplayed = await productDetailsElem.isDisplayed();
             expect(isDisplayed).toBeTruthy();
-            await page.goto(`${baseUrl}${basePath}/catalog`);
+            await page.goto(`${baseUrl}${basePath}/catalog`)
         }
     });
 })
